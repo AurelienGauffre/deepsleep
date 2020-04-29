@@ -1,33 +1,38 @@
-"""This script uses the gdown Python library to download the data folder from
+"""
+This script uses the gdown Python library to download the data folder from
 Google Drive.
 """
 
-from colorama import Fore, Style, deinit, init
-import gdown
 from pathlib import Path
 from zipfile import ZipFile
 
+import gdown
+from colorama import deinit, init
 
-def print_blue_bold(message: str) -> str:
-    print(f'{Fore.BLUE}{Style.BRIGHT}{message}{Style.RESET_ALL}')
-
+from utils import print_blue_bold
 
 if __name__ == '__main__':
-    # initialize terminal colors
+    drive_file_id = '1vU4S7q4b_w29SS3IMhTD8wK4TP80MiuS'
+    url = f'https://drive.google.com/uc?id={drive_file_id}'
+    output_path = Path('data/data.zip')
+
+    # initialise terminal colors
     init()
 
-    url = 'https://drive.google.com/uc?id=1AZq1k-kft9sZ9Rj3y4OrCi6nJaKbyh4U'
-    output = Path('data/data.zip')
+    # download file from Google Drive
+    print_blue_bold(f'> Download file from Google Drive to {output_path}...')
+    gdown.download(url, str(output_path), quiet=False)
 
-    print_blue_bold(f'> Downloading from Google Drive ({url}) to {output}...')
-    gdown.download(url, str(output), quiet=False)
+    # unzip and inflate .zip file
+    print_blue_bold(
+        f'> Unzip and inflate {output_path} in {output_path.parent}/...'
+    )
+    with ZipFile(str(output_path), 'r') as zip_file:
+        zip_file.extractall(output_path.parent)
 
-    print_blue_bold(f'\n> Unziping and inflating {output}...')
-    with ZipFile(str(output), 'r') as zip_file:
-       zip_file.extractall()
+    # remove downloaded .zip file
+    print_blue_bold(f'> Remove {output_path}...')
+    output_path.unlink()
 
-    print_blue_bold(f'\n> Removing {output}...')
-    output.unlink()
-
-    # de-initialize terminal colors
+    # de-initialise terminal colors
     deinit()
