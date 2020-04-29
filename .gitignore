@@ -1,0 +1,20 @@
+# Python's bytecode compiled files
+__pycache__/
+*.pyc
+
+# Python Eggs
+*.egg-info/
+
+# PyCharm settings folder
+.idea/
+
+# macOS specific
+.DS_Store
+
+# data/ folder
+data/**
+!data/.gitkeep
+
+# misc/ folder
+misc/**
+!misc/.gitkeep
