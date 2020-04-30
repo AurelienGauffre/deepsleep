@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "deepsleep"
+version = "0.1.0"
+description = ""
+authors = ["Aurélien Gauffre <aurelien.gauffre@gmail.com>", "Pierre Guilmin <pierre.guilmin@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+numpy = "^1.18.3"
+pandas = "^1.0.3"
+# poetry run pip install torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html
+# torch = "^1.4.0"
+
+[tool.poetry.dev-dependencies]
+#pytest = "^5.2"
+
+
+
