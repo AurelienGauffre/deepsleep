@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "deepsleep"
 version = "0.1.0"
-description = ""
-authors = ["Aurélien Gauffre <aurelien.gauffre@gmail.com>", "Pierre Guilmin <pierre.guilmin@gmail.com>"]
+description = "Sleep analysis using deep learning"
+authors = [
+    "Aurélien Gauffre <aurelien.gauffre@gmail.com>",
+    "Pierre Guilmin <pierre.guilmin@gmail.com>"
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -12,7 +15,6 @@ pandas = "^1.0.3"
 # torch = "^1.4.0"
 
 [tool.poetry.dev-dependencies]
-#pytest = "^5.2"
-
-
-
+gdown = "^3.10.3"
+colorama = "^0.4.3"
+pydrive = "^1.3.1"
