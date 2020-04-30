@@ -5,7 +5,7 @@ Sleep analysis using deep learning.
 Run the following command to populate your `data/` folder with the datasets:
 ```shell
 # fetch the datasets from Google Drive
-python dev/get_data.py
+poetry run python dev/get_data.py
 ```
 
 :warning: Please contact the repository maintainers if you get the following 
@@ -20,5 +20,5 @@ To update the datasets, you need to upload your local `data/` folder to Google
 Drive as a `.zip` (reserved to maintainers):
 ```shell
 # upload the local data/ folder to Google Drive
-python dev/upload_data_to_drive.py
+poetry run python dev/upload_data_to_drive.py
 ```
