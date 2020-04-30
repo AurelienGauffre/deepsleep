@@ -19,5 +19,5 @@ data/**
 misc/**
 !misc/.gitkeep
 
-# Google Drive secrets
-client_secrets.json
+# Google credentials
+google_credentials.txt
