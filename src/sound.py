@@ -9,25 +9,24 @@ import librosa.display  # and the display module for visualization
 
 class Sound:
     """
-    Basic class to deal with sounds
+    Basic class to deal with sounds.
     """
 
-    def __init__(self, path=None, sampling_rate=None, process=True):
+    def __init__(
+        self, path: str = None, sampling_rate: int = None, process: bool = True
+    ):
         self.path = path
         self.folder, self.filename = os.path.split(self.path)
         self.filebase, self.ext = os.path.splitext(self.filename)
         self.y, self.sampling_rate = librosa.load(self.path, sr=sampling_rate)
         self.spectrogram = self.compute_spectrogram() if process else None
 
-    def compute_spectrogram(self, n_mels=256):
+    def compute_spectrogram(self, n_mels: int = 256):
         """
-
         Args:
             n_mels: vertical resolution of the spectrogram
-
         Returns:
-            melspectrogram on a log scale
-
+            Melspectrogram on a log scale
         """
         return librosa.power_to_db(
             librosa.feature.melspectrogram(
@@ -49,32 +48,66 @@ class Sound:
         plt.tight_layout()
         plt.show()
 
-    def to_samples(self, sample_size=1, output_folder=None, suffix='_sample_'):
+    def to_samples(
+        self,
+        sample_length: float = 4,
+        mode: str = 'duplicate',
+        output_folder: str = None,
+        suffix: str = 'sample',
+    ):
         """
-        Take the sound in self.y and split in into samples of size sample_size
+        Take the sound in self.y and split in into samples of size sample_size.
+
         Args:
-            sample_size: length of each sample in logs
-            output_folder: folder where samples are saved
-            suffix: string add at the end of the files
+            mode: Set to one of 3 values : 'drop','duplicate','keep' to select
+            how to deal with last sample. Drop will drop the sample,
+            keep will keep a sample from an unknown size, and 'duplicate'
+            will add a small part from the previous sample to make the last
+            one of equal size.
+            sample_length: length of each sample in seconds.
+            output_folder: Folder where samples are saved.
+            suffix: String add at the end of the files.
         """
+
         output_folder = self.folder if output_folder is None else output_folder
-        i, step_size = 0, sample_size * self.sampling_rate
+        step_size = int(sample_length * self.sampling_rate)
+        i = 0
         n = len(self.y)
-        while i * step_size < n:
+        print(n // step_size)
+        for i in range(n // step_size):
             librosa.output.write_wav(
-                os.path.join(
-                    output_folder, self.filebase + suffix + str(i) + '.wav'
-                ),
-                self.y[i * step_size : min(i * step_size + step_size, n)],
+                os.path.join(output_folder, f'{self.filebase}_{suffix}_{i}.wav'),
+                self.y[i * step_size : (i + 1) * step_size],
                 sr=self.sampling_rate,
                 norm=False,
             )
-            i += 1
+        if n % step_size != 0:  # if the last sample is smaller than the others
+            i = n // step_size
+            if mode == 'drop':
+                pass
+            elif mode == 'duplicate':
+                librosa.output.write_wav(
+                    os.path.join(
+                        output_folder, f'{self.filebase}_{suffix}_{i}.wav'
+                    ),
+                    self.y[n - step_size : n],
+                    sr=self.sampling_rate,
+                    norm=False,
+                )
+            elif mode == 'keep':
+                librosa.output.write_wav(
+                    os.path.join(
+                        output_folder, f'{self.filebase}_{suffix}_{i}.wav'
+                    ),
+                    self.y[i * step_size : n],
+                    sr=self.sampling_rate,
+                    norm=False,
+                )
 
 
 if __name__ == '__main__':
     for file in os.listdir('../../Talk'):
         print(file)
-        s1 = Sound(os.path.join('../../Talk/',file))
-        s1.to_samples(sample_size=4)
-        #s1.plot_spectrogram()
+        s1 = Sound(os.path.join('../../Talk/', file))
+        s1.to_samples(sample_length=4, mode='duplicate')
+        # s1.plot_spectrogram()
