@@ -24,4 +24,4 @@ poetry run python dev/upload_data_to_drive.py
 ```
 
 ## Contributing
-If you wish to contribute to this project please head to [CONTRIBUTING.md](https://github.com/Cocopyth/foodshare/blob/master/CONTRIBUTING.md).
+If you wish to contribute to this project please head to [CONTRIBUTING.md](https://github.com/AurelienGauffre/DeepSleep/blob/master/CONTRIBUTING.md).
