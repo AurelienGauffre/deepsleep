@@ -10,9 +10,11 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.7"
 numpy = "^1.18.3"
-pandas = "^1.0.3"
+pandas = "^1.0.0"
 # poetry run pip install torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html
-# torch = "^1.5.0"
+torch = "^1.5.0"
+matplotlib = "^3.2.1"
+librosa = "^0.7.2"
 
 [tool.poetry.dev-dependencies]
 gdown = "3.10.2"

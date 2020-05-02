@@ -1,6 +1,3 @@
-from pathlib import Path
-
-import yaml
 from colorama import Fore, Style
 
 

@@ -73,6 +73,8 @@ class Sound:
 
 
 if __name__ == '__main__':
-    s1 = Sound('../misc/trap.mp3')
-    s1.to_samples(sample_size=4)
-    s1.plot_spectrogram()
+    for file in os.listdir('../../Talk'):
+        print(file)
+        s1 = Sound(os.path.join('../../Talk/',file))
+        s1.to_samples(sample_size=4)
+        #s1.plot_spectrogram()
