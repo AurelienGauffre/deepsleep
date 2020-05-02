@@ -8,13 +8,13 @@ authors = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.6.9"
 numpy = "^1.18.3"
 pandas = "^1.0.0"
-# poetry run pip install torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html
-torch = "^1.5.0"
 matplotlib = "^3.2.1"
 librosa = "^0.7.2"
+# specific installation for Windows, see CONTRIBUTING.md
+torch = { version = "^1.5.0", markers = "sys_platform != 'win32'" }
 
 [tool.poetry.dev-dependencies]
 gdown = "3.10.2"
