@@ -25,12 +25,17 @@ following from within the project folder to install all the dependencies:
 poetry install
 ```
 
-:warning: For Windows user, you may also run the following command to
-install PyTorch after you've successfully installed the other dependencies
-using the previous command:
-```shell
-poetry run pip install torch==1.5.0+cpu torchvision==0.6.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-```
+:warning: For Windows user:
+- if you encounter an error installing gdown, you may want to intsall wheel with the following command:
+  ```shell
+  poetry run pip install wheel  
+  ```
+- after you've successfully installed the other dependencies
+using the previous command,you may also run the following command to
+install PyTorch:
+  ```shell
+  poetry run pip install torch==1.5.0+cpu torchvision==0.6.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+  ```
 
 ## Write some code
 This project follows [PEP 8](https://www.python.org/dev/peps/pep-0008/) guidelines.

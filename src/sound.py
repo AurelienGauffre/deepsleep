@@ -12,6 +12,9 @@ class Sound:
     Basic class to deal with sounds.
     """
 
+    class SpectrogramNotComputed(Exception):
+        pass
+
     def __init__(
         self, path: str = None, sampling_rate: int = None, process: bool = True
     ):
@@ -19,7 +22,10 @@ class Sound:
         self.folder, self.filename = os.path.split(self.path)
         self.filebase, self.ext = os.path.splitext(self.filename)
         self.y, self.sampling_rate = librosa.load(self.path, sr=sampling_rate)
-        self.spectrogram = self.compute_spectrogram() if process else None
+        self.spectrogram = None
+
+        if process:
+            self.compute_spectrogram()
 
     def compute_spectrogram(self, n_mels: int = 256):
         """
@@ -35,18 +41,21 @@ class Sound:
             ref=np.max,
         )  # convert to log scale (dB). Use the peak power (max) as ref
 
-    def plot_spectrogram(self):
-        plt.figure(figsize=(12, 4))
+    def plot_spectrogram(self, ax=None):
+        if self.spectrogram is None:
+            raise Sound.SpectrogramNotComputed(
+                'please call compute_spectrogram() to compute the '
+                'sound spectrogram before trying to plot it'
+            )
+        ax = plt.gca() if ax is None else ax
         librosa.display.specshow(
             self.spectrogram,
             sr=self.sampling_rate,
             x_axis='time',
             y_axis='mel',
+            ax=ax,
         )
-        plt.title('mel power spectrogram')
-        plt.colorbar(format='%+02.0f dB')
-        plt.tight_layout()
-        plt.show()
+        ax.set_title('mel power spectrogram')
 
     def to_samples(
         self,
