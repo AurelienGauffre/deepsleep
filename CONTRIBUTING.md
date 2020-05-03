@@ -7,8 +7,8 @@ The project was written using **Python 3.6.9+** and uses [**Poetry**](https://py
 :open_file_folder: **Clone the repository**  
 Clone the repository and dive into it:
 ```shell
-git clone https://github.com/AurelienGauffre/DeepSleep
-cd DeepSleep
+git clone https://github.com/AurelienGauffre/deepsleep
+cd deepsleep
 ```
 
 :four_leaf_clover: **Install poetry**  
