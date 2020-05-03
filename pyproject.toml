@@ -15,6 +15,7 @@ matplotlib = "^3.2.1"
 librosa = "^0.7.2"
 # specific installation for Windows, see CONTRIBUTING.md
 torch = { version = "^1.5.0", markers = "sys_platform != 'win32'" }
+numba = "0.48.0" #last version 0.49.0 is throwing warnings
 
 [tool.poetry.dev-dependencies]
 gdown = "3.10.2"
