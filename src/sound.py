@@ -1,10 +1,10 @@
 import os
-
-import matplotlib.pyplot as plt
-import numpy as np
+from pathlib import Path
 
 import librosa  # Librosa for audio
 import librosa.display  # and the display module for visualization
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Sound:
@@ -16,7 +16,10 @@ class Sound:
         pass
 
     def __init__(
-        self, path: str = None, sampling_rate: int = None, process: bool = True
+        self,
+        path: Path = None,
+        sampling_rate: int = None,
+        process: bool = True,
     ):
         self.path = path
         self.folder, self.filename = os.path.split(self.path)
@@ -82,10 +85,11 @@ class Sound:
         step_size = int(sample_length * self.sampling_rate)
         i = 0
         n = len(self.y)
-        print(n // step_size)
         for i in range(n // step_size):
             librosa.output.write_wav(
-                os.path.join(output_folder, f'{self.filebase}_{suffix}_{i}.wav'),
+                os.path.join(
+                    output_folder, f'{self.filebase}_{suffix}_{i}.wav'
+                ),
                 self.y[i * step_size : (i + 1) * step_size],
                 sr=self.sampling_rate,
                 norm=False,
