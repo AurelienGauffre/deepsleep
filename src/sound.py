@@ -28,7 +28,7 @@ class Sound:
         self.spectrogram = None
 
         if process:
-            self.compute_spectrogram()
+            self.spectrogram = self.compute_spectrogram()
 
     def compute_spectrogram(self, n_mels: int = 256):
         """
@@ -122,5 +122,6 @@ if __name__ == '__main__':
     for file in os.listdir('../../Talk'):
         print(file)
         s1 = Sound(os.path.join('../../Talk/', file))
-        s1.to_samples(sample_length=4, mode='duplicate')
-        # s1.plot_spectrogram()
+        # s1.to_samples(sample_length=4, mode='duplicate')
+        s1.plot_spectrogram()
+        plt.show()

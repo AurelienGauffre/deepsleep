@@ -9,9 +9,9 @@ from torch.utils.data import Dataset
 from metamodel import Metamodel
 
 
-class Net0(nn.Module):
+class NetA0(nn.Module):
     def __init__(self):
-        super(Model, self).__init__()
+        super(NetA0, self).__init__()
         self.conv1 = nn.Conv1d(1, 128, 80, 4)
         self.bn1 = nn.BatchNorm1d(128)
         self.pool1 = nn.MaxPool1d(4)
@@ -48,23 +48,28 @@ class Net0(nn.Module):
         return F.log_softmax(x, dim=2)
 
 
-class Model0(Metamodel):
+class ModelA(Metamodel):
     def __init__(
         self,
         dataset_name=None,
-        loss_fc=None,
-        optimizer=None,
-        nb_epochs=None,
+        data_nature='1D',
+        loss_fc=nn.NLLLoss(),
+        optimizer=torch.optim.Adamax,
+        learning_rate=10e-3,
+        nb_epochs=10,
+        batch_size=4,
         scheduler=None,
-        network=Net0,
+        network=NetA0(),
     ):
-
+        self.network = network
         super().__init__(
-            dataset_name, loss_fc, optimizer, nb_epochs, scheduler,
+            dataset_name,
+            data_nature,
+            loss_fc,
+            optimizer,
+            learning_rate,
+            nb_epochs,
+            batch_size,
+            scheduler,
+            network,
         )
-
-    def init_model(self) -> Net0:
-        return Net0
-
-
-model0 = Model0()
