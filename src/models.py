@@ -9,9 +9,9 @@ from torch.utils.data import Dataset
 from metamodel import Metamodel
 
 
-class NetA0(nn.Module):
-    def __init__(self):
-        super(NetA0, self).__init__()
+class NetConv1D(nn.Module):
+    def __init__(self, nb_labels):
+        super(NetConv1D, self).__init__()
         self.conv1 = nn.Conv1d(1, 128, 80, 4)
         self.bn1 = nn.BatchNorm1d(128)
         self.pool1 = nn.MaxPool1d(4)
@@ -24,10 +24,13 @@ class NetA0(nn.Module):
         self.conv4 = nn.Conv1d(256, 512, 3)
         self.bn4 = nn.BatchNorm1d(512)
         self.pool4 = nn.MaxPool1d(4)
+        self.conv5 = nn.Conv1d(512, 1024, 3)
+        self.bn5 = nn.BatchNorm1d(1024)
+        self.pool5 = nn.MaxPool1d(6)
         self.avgPool = nn.AvgPool1d(
             30
         )  # input should be 512x30 so this outputs a 512x1
-        self.fc1 = nn.Linear(512, 10)
+        self.fc1 = nn.Linear(1024, nb_labels)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -42,13 +45,16 @@ class NetA0(nn.Module):
         x = self.conv4(x)
         x = F.relu(self.bn4(x))
         x = self.pool4(x)
+        x = self.conv5(x)
+        x = F.relu(self.bn5(x))
+        x = self.pool5(x)
         x = self.avgPool(x)
-        x = x.permute(0, 2, 1)  # change the 512x1 to 1x512
+        x = x.view(x.shape[0], -1)  # from shape (bs,channel,len)  to (bs,len)
         x = self.fc1(x)
-        return F.log_softmax(x, dim=2)
+        return F.log_softmax(x, dim=1)
 
 
-class ModelA(Metamodel):
+class ModelConv1D(Metamodel):
     def __init__(
         self,
         dataset_name=None,
@@ -59,7 +65,7 @@ class ModelA(Metamodel):
         nb_epochs=10,
         batch_size=4,
         scheduler=None,
-        network=NetA0(),
+        network=NetConv1D,
     ):
         self.network = network
         super().__init__(

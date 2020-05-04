@@ -29,20 +29,21 @@ class Metamodel:
         )
         self.nb_epochs = nb_epochs
         self.batch_size = batch_size
-        self.log_interval = 20
+        self.loss_fc = loss_fc
+        self.log_interval = 2
         self.dataset_name = dataset_name
-        self.network = network
         self.learning_rate = learning_rate
         self.data_nature = data_nature
 
-        self.model = self.init_model()
         self.dataset = self.init_dataset()
+        self.network = self.init_network()
         self.train_loader, self.test_loader = self.init_data_loader()
         self.optimizer = self.init_optimizer(optimizer)
         self.scheduler = self.init_scheduler()
 
-    def init_model(self) -> nn.Module:
-        return self.network
+    def init_network(self) -> nn.Module:
+        return self.network(self.dataset.nb_labels)  # we instantiate the
+        # network here
 
     def init_dataset(self) -> torch.utils.data.Dataset:
         return SoundDataset(
@@ -78,24 +79,19 @@ class Metamodel:
             for batch_idx, input in enumerate(self.train_loader):
                 self.optimizer.zero_grad()
                 x, label = input['sound'], input['label']
-                print(x)
                 x = x.to(self.device)
+                label = label.to(self.device)
                 x.requires_grad_()
-                output = self.model(x)
-                # output = output.permute(
-                #     1, 0, 2
-                # )  # original output dimensions are batchSizex1x10
-                loss = self.loss_fc(output[0], label)
+                output = self.network(x)
+                # original output dimensions are batchSizex1x10
+                loss = self.loss_fc(output, label)
                 # the loss functions expects a 1xbatchSizex10 input
                 loss.backward()
                 self.optimizer.step()
                 if batch_idx % self.log_interval == 0:  # print training stats
                     print(
-                        'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                            epoch,
-                            batch_idx * len(x),
-                            len(self.train_loader.dataset),
-                            100.0 * batch_idx / len(self.train_loader),
-                            loss,
-                        )
+                        f'Train Epoch: {epoch} [{batch_idx * len(x)}'
+                        f'{len(self.train_loader.dataset)} '
+                        f'({100.0 * batch_idx / len(self.train_loader)}%)]'
+                        f'\tLoss: {loss:.2f}'
                     )

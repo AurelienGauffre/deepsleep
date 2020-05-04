@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms, utils
@@ -30,8 +31,9 @@ class SoundDataset(Dataset):
                 f'folder{SoundDataset.DATA_FOLDER}'
             )
         self.sounds_list = list(self.root_dir.rglob('*.wav'))
-        self.classes = [f.stem for f in self.root_dir.glob('*/') if f.is_dir()]
-        self.nb_classes = len(self.classes)
+        self.labels = [f.stem for f in self.root_dir.glob('*/') if f.is_dir()]
+        self.nb_labels = len(self.labels)
+        self.label_to_num = {label: i for i, label in enumerate(self.labels)}
         self.data_nature = data_nature
         # TODO: Define a proper init_transforms
         self.transform = transforms.Compose([ToTensor(self.data_nature)])
@@ -48,7 +50,7 @@ class SoundDataset(Dataset):
             path=sound_path,
             process=False if self.data_nature == '1D' else True,
         )
-        sample = {'sound': sound, 'label': label}
+        sample = {'sound': sound, 'label': self.label_to_num[label]}
 
         if self.transform:
             sample = self.transform(sample)
@@ -69,7 +71,11 @@ class ToTensor(object):
 
         sound, label = sample['sound'], sample['label']
         if self.data_nature == '1D':
-            return {'sound': torch.from_numpy(sound.y), 'label': label}
+            return {
+                'sound': torch.from_numpy(sound.y).unsqueeze(0),
+                'label': label,
+            }
+        # conv1D expect sample following the shape [bs,nb_channel,lenght]
         elif self.data_nature == '2D':
             return {
                 'sound': torch.from_numpy(sound.spectrogram),
