@@ -35,8 +35,7 @@ class SoundDataset(Dataset):
         self.nb_labels = len(self.labels)
         self.label_to_num = {label: i for i, label in enumerate(self.labels)}
         self.data_nature = data_nature
-        # TODO: Define a proper init_transforms
-        self.transform = transforms.Compose([ToTensor(self.data_nature)])
+        self.transform = transform
 
     def __len__(self):
         return len(self.sounds_list)
@@ -51,9 +50,7 @@ class SoundDataset(Dataset):
             process=False if self.data_nature == '1D' else True,
         )
         sample = {'sound': sound, 'label': self.label_to_num[label]}
-
-        if self.transform:
-            sample = self.transform(sample)
+        sample = self.transform(sample)
         return sample
 
 

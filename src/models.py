@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset
 
+from dataset import ToTensor
 from metamodel import Metamodel
 
 
@@ -59,11 +60,13 @@ class ModelConv1D(Metamodel):
         self,
         dataset_name=None,
         data_nature='1D',
+        transform=[],
         loss_fc=nn.NLLLoss(),
         optimizer=torch.optim.Adamax,
         learning_rate=10e-3,
         nb_epochs=10,
         batch_size=4,
+        test_size=0.25,
         scheduler=None,
         network=NetConv1D,
     ):
@@ -71,11 +74,13 @@ class ModelConv1D(Metamodel):
         super().__init__(
             dataset_name,
             data_nature,
+            transform,
             loss_fc,
             optimizer,
             learning_rate,
             nb_epochs,
             batch_size,
+            test_size,
             scheduler,
             network,
         )
