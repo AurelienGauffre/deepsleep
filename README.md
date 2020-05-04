@@ -1,5 +1,6 @@
-# deepsleep
-Sleep analysis using deep learning.
+# deepsleep :zzz:
+Sleep analysis from sound recording using Pytorch. 
+First aim of this project is to build and tune general sound classifiers to detect automatically for instance somniloquy.
 
 ### Get the datasets
 Run the following command to populate your `data/` folder with the datasets:
@@ -8,15 +9,8 @@ Run the following command to populate your `data/` folder with the datasets:
 poetry run python dev/get_data.py
 ```
 
-:warning: Please contact the repository maintainers if you get the following 
-error, they will know what to do:
-```
-Permission denied: https://drive.google.com/uc?id=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Maybe you need to change permission over 'Anyone with the link'?
-```
-
-### Update the datasets (maintainers only)
-To update the datasets, you need to upload your local `data/` folder to Google 
+### Update the datasets
+The datasets from your local `data/` folder will be automatically updated to Google 
 Drive as a `.zip` (reserved to maintainers):
 ```shell
 # upload the local data/ folder to Google Drive
