@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 
 import librosa  # Librosa for audio
-import librosa.util
 import librosa.display  # and the display module for visualization
+import librosa.util
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -91,12 +91,12 @@ class Sound:
         step_size = int(sample_length * self.sampling_rate)
         i = 0
         n = len(self.y)
-        if n < step_size: # sound is smaller than required sample size
+        if n < step_size:  # sound is smaller than required sample size
             librosa.output.write_wav(
                 os.path.join(
                     output_folder, f'{self.filebase}_{suffix}_{i}.wav'
                 ),
-                np.pad(self.y, (0, step_size - n)), # 0 padding at the end
+                np.pad(self.y, (0, step_size - n)),  # 0 padding at the end
                 sr=self.sampling_rate,
                 norm=False,
             )
@@ -110,7 +110,9 @@ class Sound:
                     sr=self.sampling_rate,
                     norm=False,
                 )
-            if n % step_size != 0:  # if the last sample is smaller than the others
+            if (
+                n % step_size != 0
+            ):  # if the last sample is smaller than the others
                 i = n // step_size
                 if mode == 'drop':
                     pass
@@ -138,8 +140,10 @@ if __name__ == '__main__':
     folder = '../../Sleep'
     for file in os.listdir(folder):
         print(file)
-        s1 = Sound(os.path.join(folder, file),process=False)
-        s1.to_samples(sample_length=4, mode='duplicate')
-       # s1.plot_spectrogram()
-        #plt.show()
-        #print(s1.y.shape)
+        s1 = Sound(os.path.join(folder, file), process=False)
+        # s1.to_samples(sample_length=4, mode='duplicate')
+        # s1.plot_spectrogram()
+        # plt.show()
+        print(s1.y.shape)
+        print(s1.sampling_rate)
+        break

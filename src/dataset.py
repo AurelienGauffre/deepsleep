@@ -16,7 +16,9 @@ class SoundDataset(Dataset):
     class DatasetFolderNotFound(Exception):
         pass
 
-    def __init__(self, dataset_name, transform, data_nature='2D'):
+    def __init__(
+        self, dataset_name, transform, data_nature='2D', sampling_rate=None
+    ):
         """
         Args:
             dataset_name (string): Directory with all the images.
@@ -24,6 +26,7 @@ class SoundDataset(Dataset):
                 on a sample.
         """
         self.dataset_name = dataset_name
+        self.sampling_rate = sampling_rate
         self.root_dir = SoundDataset.DATA_FOLDER / dataset_name
         if not self.root_dir.exists():
             raise SoundDataset.DatasetFolderNotFound(
@@ -48,6 +51,7 @@ class SoundDataset(Dataset):
         sound = Sound(
             path=sound_path,
             process=False if self.data_nature == '1D' else True,
+            sampling_rate=self.sampling_rate,
         )
         sample = {'sound': sound, 'label': self.label_to_num[label]}
         sample = self.transform(sample)

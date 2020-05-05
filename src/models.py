@@ -60,20 +60,22 @@ class ModelConv1D(Metamodel):
         self,
         dataset_name=None,
         data_nature='1D',
-        transform=[],
+        sampling_rate=None,
+        transform=None,
         loss_fc=nn.NLLLoss(),
         optimizer=torch.optim.Adamax,
         learning_rate=10e-3,
         nb_epochs=10,
         batch_size=4,
         test_size=0.25,
+        network_class=NetConv1D,
         scheduler=None,
-        network=NetConv1D,
     ):
-        self.network = network
+        self.network = network_class
         super().__init__(
             dataset_name,
             data_nature,
+            sampling_rate,
             transform,
             loss_fc,
             optimizer,
@@ -81,6 +83,6 @@ class ModelConv1D(Metamodel):
             nb_epochs,
             batch_size,
             test_size,
+            network_class,
             scheduler,
-            network,
         )

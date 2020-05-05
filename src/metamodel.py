@@ -18,6 +18,7 @@ class Metamodel:
         self,
         dataset_name,
         data_nature,
+        sampling_rate,
         transform,
         loss_fc,
         optimizer,
@@ -25,12 +26,13 @@ class Metamodel:
         nb_epochs,
         batch_size,
         test_size,
-        network=None,
-        scheduler=None,
+        network_class,
+        scheduler,
     ):
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu"
         )
+        self.sampling_rate = sampling_rate
         self.nb_epochs = nb_epochs
         self.batch_size = batch_size
         self.loss_fc = loss_fc
@@ -47,14 +49,16 @@ class Metamodel:
             self.dataset_test,
         ) = self.init_dataset()
         self.train_loader, self.test_loader = self.init_data_loader()
-        self.network = self.init_network()
+        self.network = self.init_network(network_class)
         self.optimizer = self.init_optimizer(optimizer)
         self.scheduler = self.init_scheduler()
 
-    def init_network(self) -> nn.Module:
-        return self.network(self.dataset.nb_labels)  # network is instantiated
+    def init_network(self, network_class) -> nn.Module:
+        return network_class(self.dataset.nb_labels)  # network is instantiated
 
     def init_transform(self, transform):
+        if transform is None:
+            transform = []
         return transforms.Compose([ToTensor(self.data_nature)] + transform)
 
     def init_dataset(self) -> Tuple[torch.utils.data.Dataset, ...]:
@@ -63,6 +67,7 @@ class Metamodel:
             dataset_name=self.dataset_name,
             transform=self.transform,
             data_nature=self.data_nature,
+            sampling_rate=self.sampling_rate,
         )
         len_test = int(len(dataset) * self.test_size)
         dataset_train, dataset_test = random_split(
