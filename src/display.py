@@ -45,27 +45,40 @@ class Bar(object):
 
     def _display(self):
         if len(self._time) > 1:
-            t = (self._time[-1] - self._time[-2])
+            t = self._time[-1] - self._time[-2]
             eta = t * (len(self.dataloader) - self._idx)
         else:
             eta = 0
 
-        rate = self._idx / len(self.dataloader)
+        rate = self._idx / (len(self.dataloader) - 1)
         len_bar = int(rate * self._DISPLAY_LENGTH)
         bar = ('=' * len_bar + '>').ljust(self._DISPLAY_LENGTH, '.')
         idx = str(self._batch_idx).rjust(len(str(len(self.dataset))), ' ')
 
         tmpl = '\r{}/{}: [{}] - ETA {:.1f}s'.format(
-            idx,
-            len(self.dataset),
-            bar,
-            eta
+            idx, len(self.dataset), bar, eta
         )
-        print(tmpl, end='')
-        if self._batch_idx == len(self.dataset):
-            print()
+        print(tmpl, end=' ')
+        # if self._batch_idx == len(self.dataset):
+        #     print()
 
     def _reset(self):
         self._idx = 0
         self._batch_idx = 0
         self._time = []
+
+
+class Color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+    def bold(self, string):
+        return self.BOLD + string + self.END
