@@ -10,22 +10,22 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import transforms
 
 from dataset import SoundDataset, ToTensor
-
+from display import Bar
 
 class Metamodel:
     def __init__(
-        self,
-        dataset_name,
-        data_nature,
-        transform,
-        loss_fc,
-        optimizer,
-        learning_rate,
-        nb_epochs,
-        batch_size,
-        test_size,
-        network=None,
-        scheduler=None,
+            self,
+            dataset_name,
+            data_nature,
+            transform,
+            loss_fc,
+            optimizer,
+            learning_rate,
+            nb_epochs,
+            batch_size,
+            test_size,
+            network=None,
+            scheduler=None,
     ):
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -93,23 +93,29 @@ class Metamodel:
         pass
 
     def train(self):
-        for epoch in range(self.nb_epochs):
-            for batch_idx, input in enumerate(self.train_loader):
-                self.optimizer.zero_grad()
+        for epoch_idx in range(self.nb_epochs):
+            self.train_step(epoch_idx)
+            self.test_step(epoch_idx)
+
+    def train_step(self,epoch_idx):
+        running_loss = 0
+        running_acc = 0
+        for batch_idx, input in enumerate(Bar(self.train_loader)):
+            self.optimizer.zero_grad()
+            x, label = input['sound'], input['label']
+            x = x.to(self.device)
+            label = label.to(self.device)
+            x.requires_grad_()
+            output = self.network(x)
+            loss = self.loss_fc(output, label)
+            loss.backward()
+            self.optimizer.step()
+
+    def test_step(self, epoch_idx):
+        for batch_idx, input in enumerate(Bar(self.train_loader)):
+            with torch.no_grad():
                 x, label = input['sound'], input['label']
                 x = x.to(self.device)
                 label = label.to(self.device)
-                x.requires_grad_()
                 output = self.network(x)
-                # original output dimensions are batchSizex1x10
                 loss = self.loss_fc(output, label)
-                # the loss functions expects a 1xbatchSizex10 input
-                loss.backward()
-                self.optimizer.step()
-                if batch_idx % self.log_interval == 0:  # print training stats
-                    print(
-                        f'Train Epoch: {epoch} [{batch_idx * len(x)}'
-                        f'{len(self.train_loader.dataset)} '
-                        f'({100.0 * batch_idx / len(self.train_loader)}%)]'
-                        f'\tLoss: {loss:.2f}'
-                    )
