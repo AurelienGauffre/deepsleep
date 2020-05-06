@@ -91,7 +91,9 @@ class Sound:
         step_size = int(sample_length * self.sampling_rate)
         i = 0
         n = len(self.y)
+
         if n < step_size:  # sound is smaller than required sample size
+            # print(' short', np.pad(self.y, (0, step_size - n)).shape)
             librosa.output.write_wav(
                 os.path.join(
                     output_folder, f'{self.filebase}_{suffix}_{i}.wav'
@@ -137,13 +139,12 @@ class Sound:
 
 
 if __name__ == '__main__':
-    folder = '../../Sleep'
-    for file in os.listdir(folder):
+    folder = Path('../data/urban/processed_1D/talk')
+    for file in folder.glob('*.wav'):
         print(file)
-        s1 = Sound(os.path.join(folder, file), process=False)
-        # s1.to_samples(sample_length=4, mode='duplicate')
+        s1 = Sound(file, process=False, sampling_rate=None)
         # s1.plot_spectrogram()
         # plt.show()
         print(s1.y.shape)
         print(s1.sampling_rate)
-        break
+        # s1.to_samples(sample_length=4, mode='duplicate')

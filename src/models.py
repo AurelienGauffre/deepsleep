@@ -60,6 +60,7 @@ class ModelConv1D(Metamodel):
         self,
         dataset_name=None,
         data_nature='1D',
+        process_data='Auto',
         sampling_rate=None,
         transform=None,
         loss_fc=nn.NLLLoss(),
@@ -75,6 +76,7 @@ class ModelConv1D(Metamodel):
         super().__init__(
             dataset_name,
             data_nature,
+            process_data,
             sampling_rate,
             transform,
             loss_fc,

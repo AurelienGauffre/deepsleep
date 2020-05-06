@@ -18,6 +18,7 @@ class Metamodel:
         self,
         dataset_name,
         data_nature,
+        process_data,
         sampling_rate,
         transform,
         loss_fc,
@@ -37,6 +38,7 @@ class Metamodel:
         self.batch_size = batch_size
         self.loss_fc = loss_fc
         self.dataset_name = dataset_name
+        self.process_data = process_data
         self.learning_rate = learning_rate
         self.data_nature = data_nature
         self.test_size = test_size
@@ -68,6 +70,7 @@ class Metamodel:
             transform=self.transform,
             data_nature=self.data_nature,
             sampling_rate=self.sampling_rate,
+            process_data=self.process_data,
         )
         len_test = int(len(dataset) * self.test_size)
         dataset_train, dataset_test = random_split(

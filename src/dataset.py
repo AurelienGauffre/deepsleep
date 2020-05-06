@@ -13,11 +13,16 @@ class SoundDataset(Dataset):
 
     DATA_FOLDER = Path(__file__).resolve().parent.parent / 'data'
 
-    class DatasetFolderNotFound(Exception):
+    class DatasetFolderStructureError(Exception):
         pass
 
     def __init__(
-        self, dataset_name, transform, data_nature='2D', sampling_rate=None
+        self,
+        dataset_name,
+        transform,
+        data_nature='2D',
+        sampling_rate=None,
+        process_data='Auto',
     ):
         """
         Args:
@@ -26,15 +31,52 @@ class SoundDataset(Dataset):
                 on a sample.
         """
         self.dataset_name = dataset_name
+        self.data_nature = data_nature
         self.sampling_rate = sampling_rate
         self.root_dir = SoundDataset.DATA_FOLDER / dataset_name
-        if not self.root_dir.exists():
-            raise SoundDataset.DatasetFolderNotFound(
+        self.raw_dir = self.root_dir / 'raw'
+        self.processed_dir = self.root_dir / f'processed_{data_nature}'
+        if process_data == 'Auto':
+            self.process_data = not (self.processed_dir.exists())
+        else:
+            self.process_data = process_data
+
+        if not self.root_dir.exists(): # require dataset folder
+            raise SoundDataset.DatasetFolderStructureError(
                 f'No folder called \'{dataset_name}\' found in the dataset '
                 f'folder{SoundDataset.DATA_FOLDER}'
             )
-        self.sounds_list = list(self.root_dir.rglob('*.wav'))
-        self.labels = [f.stem for f in self.root_dir.glob('*/') if f.is_dir()]
+        if self.process_data:  # processing all the data
+            if not self.raw_dir.exists():  # require raw data folder
+                raise SoundDataset.DatasetFolderStructureError(
+                    f'To process data, raw data have to be located in \'data'
+                    f'/{dataset_name}/raw/\' '
+                )
+
+            self.processed_dir.mkdir(exist_ok=True)
+            for label in [
+                f.stem for f in self.raw_dir.glob('*/') if f.is_dir()
+            ]:
+                Path(self.root_dir / f'processed_1D' / label).mkdir(
+                    exist_ok=True
+                )
+            for file in list(self.raw_dir.rglob('*.wav')):
+                sound = Sound(
+                    file,
+                    process=not (data_nature == '1D'),
+                    sampling_rate=self.sampling_rate,
+                )
+
+                sound.to_samples(
+                    output_folder=self.processed_dir / file.parent.stem
+                )
+            if self.data_nature == '2D':
+                pass  # TODO
+
+        self.sounds_list = list(self.processed_dir.rglob('*.wav'))
+        self.labels = [
+            f.stem for f in self.processed_dir.glob('*/') if f.is_dir()
+        ]
         self.nb_labels = len(self.labels)
         self.label_to_num = {label: i for i, label in enumerate(self.labels)}
         self.data_nature = data_nature
@@ -53,6 +95,7 @@ class SoundDataset(Dataset):
             process=False if self.data_nature == '1D' else True,
             sampling_rate=self.sampling_rate,
         )
+
         sample = {'sound': sound, 'label': self.label_to_num[label]}
         sample = self.transform(sample)
         return sample
