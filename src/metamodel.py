@@ -11,24 +11,24 @@ from torchvision import transforms
 
 from dataset import SoundDataset, ToTensor
 from display import Bar, Color
-
+from sklearn.metrics import confusion_matrix
 
 class Metamodel:
     def __init__(
-        self,
-        dataset_name,
-        data_nature,
-        process_data,
-        sampling_rate,
-        transform,
-        loss_fc,
-        optimizer,
-        learning_rate,
-        nb_epochs,
-        batch_size,
-        test_size,
-        network_class,
-        scheduler,
+            self,
+            dataset_name,
+            data_nature,
+            process_data,
+            sampling_rate,
+            transform,
+            loss_fc,
+            optimizer,
+            learning_rate,
+            nb_epochs,
+            batch_size,
+            test_size,
+            network_class,
+            scheduler,
     ):
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -43,6 +43,7 @@ class Metamodel:
         self.data_nature = data_nature
         self.test_size = test_size
         self.log_interval = 10
+        self.confusion_matrix = None
 
         self.transform = self.init_transform(transform)
         (
@@ -102,9 +103,15 @@ class Metamodel:
         pass
 
     def train(self):
+        y_true, y_pred = [], []
         for epoch_idx in range(self.nb_epochs):
             self.train_step(epoch_idx)
-            self.test_step(epoch_idx)
+            y_true_tmp, y_pred_tmp = self.test_step(epoch_idx)
+            if epoch_idx == self.nb_epochs-1:
+                y_true = y_true_tmp
+                y_pred = y_pred_tmp
+        print(y_true, y_pred)
+        self.confusion_matrix=confusion_matrix(y_true,y_pred)
 
     def train_step(self, epoch_idx):
         running_loss = 0.0
@@ -134,6 +141,8 @@ class Metamodel:
     def test_step(self, epoch_idx):
         running_loss = 0.0
         running_accuracy = 0.0
+        y_pred = []
+        y_true = []
         for batch_idx, input in enumerate(self.test_loader):
             with torch.no_grad():
                 x, label = input['sound'], input['label']
@@ -144,6 +153,8 @@ class Metamodel:
 
                 _, pred = torch.max(output.data, 1)
                 running_loss += loss.item()
+                y_pred += list(pred.numpy())
+                y_true += list(label.data.numpy())
                 running_accuracy += torch.sum(pred == label.data)
         epoch_loss = running_loss / len(self.dataset_test)
         epoch_accuracy = running_accuracy / len(self.dataset_test)
@@ -151,3 +162,5 @@ class Metamodel:
             f' Test acc: {epoch_accuracy * 100: .2f}% '
             f'loss: {epoch_loss:.2f}'
         )
+
+        return y_true, y_pred
