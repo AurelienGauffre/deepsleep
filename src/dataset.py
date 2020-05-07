@@ -10,7 +10,6 @@ from sound import Sound
 
 class SoundDataset(Dataset):
     """Sound dataset"""
-
     DATA_FOLDER = Path(__file__).resolve().parent.parent / 'data'
 
     class DatasetFolderStructureError(Exception):
@@ -40,38 +39,10 @@ class SoundDataset(Dataset):
             self.process_data = not (self.processed_dir.exists())
         else:
             self.process_data = process_data
+        if self.process_data:
+            self.make_processing(data_nature)
 
-        if not self.root_dir.exists(): # require dataset folder
-            raise SoundDataset.DatasetFolderStructureError(
-                f'No folder called \'{dataset_name}\' found in the dataset '
-                f'folder{SoundDataset.DATA_FOLDER}'
-            )
-        if self.process_data:  # processing all the data
-            if not self.raw_dir.exists():  # require raw data folder
-                raise SoundDataset.DatasetFolderStructureError(
-                    f'To process data, raw data have to be located in \'data'
-                    f'/{dataset_name}/raw/\' '
-                )
 
-            self.processed_dir.mkdir(exist_ok=True)
-            for label in [
-                f.stem for f in self.raw_dir.glob('*/') if f.is_dir()
-            ]:
-                Path(self.root_dir / f'processed_1D' / label).mkdir(
-                    exist_ok=True
-                )
-            for file in list(self.raw_dir.rglob('*.wav')):
-                sound = Sound(
-                    file,
-                    process=not (data_nature == '1D'),
-                    sampling_rate=self.sampling_rate,
-                )
-
-                sound.to_samples(
-                    output_folder=self.processed_dir / file.parent.stem
-                )
-            if self.data_nature == '2D':
-                pass  # TODO
 
         self.sounds_list = list(self.processed_dir.rglob('*.wav'))
         self.labels = [
@@ -100,6 +71,40 @@ class SoundDataset(Dataset):
         sample = self.transform(sample)
         return sample
 
+    def make_processing(self,data_nature):
+        """ Process all the raw data"""
+        if not self.root_dir.exists(): # require dataset folder
+            raise SoundDataset.DatasetFolderStructureError(
+                f'No folder called \'{self.dataset_name}\' found in the '
+                f'dataset '
+                f'folder{SoundDataset.DATA_FOLDER}'
+            )
+        if self.process_data:  # processing all the data
+            if not self.raw_dir.exists():  # require raw data folder
+                raise SoundDataset.DatasetFolderStructureError(
+                    f'To process data, raw data have to be located in \'data'
+                    f'/{self.dataset_name}/raw/\' '
+                )
+
+            self.processed_dir.mkdir(exist_ok=True)
+            for label in [
+                f.stem for f in self.raw_dir.glob('*/') if f.is_dir()
+            ]:
+                Path(self.root_dir / f'processed_1D' / label).mkdir(
+                    exist_ok=True
+                )
+            for file in list(self.raw_dir.rglob('*.wav')):
+                sound = Sound(
+                    file,
+                    process=not (data_nature == '1D'),
+                    sampling_rate=self.sampling_rate,
+                )
+
+                sound.to_samples(
+                    output_folder=self.processed_dir / file.parent.stem
+                )
+            if self.data_nature == '2D':
+                pass  # TODO
 
 class ToTensor(object):
     """Convert ndarrays to Tensors. This class is used as a transform in the
