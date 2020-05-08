@@ -17,13 +17,13 @@ class Sound:
         pass
 
     def __init__(
-        self,
-        path: Path = None,
-        sampling_rate: int = None,
-        process: bool = True,
+            self,
+            path: Path = None,
+            sampling_rate: int = None,
+            process: bool = True,
     ):
         self.path = path
-        self.folder, self.filename = os.path.split(self.path)
+        self.folder, self.filename = path.parent, path.name
         self.filebase, self.ext = os.path.splitext(self.filename)
         self.y, self.sampling_rate = librosa.load(self.path, sr=sampling_rate)
         self.spectrogram = None
@@ -62,11 +62,11 @@ class Sound:
         ax.set_title('mel power spectrogram')
 
     def to_samples(
-        self,
-        sample_length: float = 4,
-        mode: str = 'duplicate',
-        output_folder: str = None,
-        suffix: str = 'sample',
+            self,
+            sample_length: float = 4,
+            mode: str = 'duplicate',
+            output_folder: str = None,
+            suffix: str = 'sample',
     ):
         """
         Take the sound in self.y and split in into samples of size sample_size.
@@ -87,55 +87,34 @@ class Sound:
             suffix: String add at the end of the files.
         """
 
-        output_folder = self.folder if output_folder is None else output_folder
+        if output_folder is None:
+            output_folder = self.folder
         step_size = int(sample_length * self.sampling_rate)
         i = 0
         n = len(self.y)
 
-        if n < step_size:  # sound is smaller than required sample size
-            # print(' short', np.pad(self.y, (0, step_size - n)).shape)
+        def save(i, suffix, y):
             librosa.output.write_wav(
-                os.path.join(
-                    output_folder, f'{self.filebase}_{suffix}_{i}.wav'
-                ),
-                np.pad(self.y, (0, step_size - n)),  # 0 padding at the end
+                Path(output_folder / f'{self.filebase}_{i}_{suffix}.wav'),
+                y,
                 sr=self.sampling_rate,
                 norm=False,
             )
+
+        if n < step_size:  # sound is smaller than required sample size
+            # print(' short', np.pad(self.y, (0, step_size - n)).shape)
+            save(0, suffix, np.pad(self.y, (0, step_size - n)))
         else:
             for i in range(n // step_size):
-                librosa.output.write_wav(
-                    os.path.join(
-                        output_folder, f'{self.filebase}_{suffix}_{i}.wav'
-                    ),
-                    self.y[i * step_size : (i + 1) * step_size],
-                    sr=self.sampling_rate,
-                    norm=False,
-                )
-            if (
-                n % step_size != 0
-            ):  # if the last sample is smaller than the others
+                save(0, suffix, self.y[i * step_size: (i + 1) * step_size])
+            if (n % step_size != 0):  # handling of last sample
                 i = n // step_size
                 if mode == 'drop':
                     pass
                 elif mode == 'duplicate':
-                    librosa.output.write_wav(
-                        os.path.join(
-                            output_folder, f'{self.filebase}_{suffix}_{i}.wav'
-                        ),
-                        self.y[n - step_size : n],
-                        sr=self.sampling_rate,
-                        norm=False,
-                    )
+                    save(0, suffix, self.y[n - step_size: n])
                 elif mode == 'keep':
-                    librosa.output.write_wav(
-                        os.path.join(
-                            output_folder, f'{self.filebase}_{suffix}_{i}.wav'
-                        ),
-                        self.y[i * step_size : n],
-                        sr=self.sampling_rate,
-                        norm=False,
-                    )
+                    save(0, suffix, self.y[i * step_size: n])
 
 
 if __name__ == '__main__':
