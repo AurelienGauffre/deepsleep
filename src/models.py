@@ -66,9 +66,9 @@ class ModelConv1D(Metamodel):
         loss_fc=nn.NLLLoss(),
         optimizer=torch.optim.Adamax,
         learning_rate=10e-3,
-        nb_epochs=10,
+        nb_epochs=4,
         batch_size=4,
-        test_size=0.25,
+        test_size=0.2,
         network_class=NetConv1D,
         scheduler=None,
     ):

@@ -10,18 +10,19 @@ from sound import Sound
 
 class SoundDataset(Dataset):
     """Sound dataset"""
+
     DATA_FOLDER = Path(__file__).resolve().parent.parent / 'data'
 
     class DatasetFolderStructureError(Exception):
         pass
 
     def __init__(
-            self,
-            dataset_name,
-            transform,
-            data_nature='2D',
-            sampling_rate=None,
-            process_data='Auto',
+        self,
+        dataset_name,
+        transform,
+        data_nature='2D',
+        sampling_rate=None,
+        process_data='Auto',
     ):
         """
         Args:
@@ -42,13 +43,12 @@ class SoundDataset(Dataset):
         if self.process_data:
             self.make_processing()
 
-        self.files_list = list(self.processed_dir.rglob('*1D.*'))
+        self.files_list = list(self.processed_dir.rglob('*clean.*'))
         self.labels = [
             f.stem for f in self.processed_dir.glob('*/') if f.is_dir()
         ]
         self.nb_labels = len(self.labels)
         self.label_to_num = {label: i for i, label in enumerate(self.labels)}
-        self.data_nature = data_nature
         self.transform = transform
 
     def __len__(self):
@@ -59,16 +59,17 @@ class SoundDataset(Dataset):
         #     idx = idx.tolist()
         file = Path(self.files_list[idx])
         label = file.parent.stem  # label is the folder name
-        sound = Sound(
-            path=file,
-            process=False if self.data_nature == '1D' else True,
-            sampling_rate=self.sampling_rate,
-        )
-        spectrogram = np.load(file.parent / f'{file.stem[:-2]}2D.npy')
 
-        sample = {'sound': sound,'spectrogram':spectrogram ,'label':
-            self.label_to_num[
-            label]}
+        sound = np.load(file.parent / f'{file.stem[:-5]}1D.npy')
+        spectrogram = np.load(file.parent / f'{file.stem[:-5]}2D.npy')
+        mfcc = np.load(file.parent / f'{file.stem[:-5]}mfcc.npy')
+
+        sample = {
+            'sound': sound,
+            'spectrogram': spectrogram,
+            'mfcc': mfcc,
+            'label': self.label_to_num[label],
+        }
         sample = self.transform(sample)
         return sample
 
@@ -91,29 +92,31 @@ class SoundDataset(Dataset):
 
         labels = [f.stem for f in self.raw_dir.glob('*/') if f.is_dir()]
         for label in labels:
-            Path(self.processed_dir / label).mkdir(
-                exist_ok=True
-            )
-        # 1D Process
+            Path(self.processed_dir / label).mkdir(exist_ok=True)
+        # Cutting Process
         for file in list(self.raw_dir.rglob('*.wav')):
             sound = Sound(
-                file,
-                process=False,
-                sampling_rate=self.sampling_rate,
+                file, process=False, sampling_rate=self.sampling_rate,
             )
             sound.to_samples(
                 output_folder=self.processed_dir / file.parent.stem,
-                suffix='1D'
+                suffix='clean',
             )
-        # 2D Process
-        for file in list(self.processed_dir.rglob('*1D.wav')):
-            sound = Sound(
-                file,
-                process=True,
-                sampling_rate=None,
+        # Other processing
+        for file in list(self.processed_dir.rglob('*clean.wav')):
+            sound = Sound(file, process=True, sampling_rate=None,)
+            np.save(
+                Path(file.parent / f'{file.stem[:-5]}1D.npy'), sound.y,
             )
-            np.save(Path(file.parent / f'{file.stem[:-2]}2D.npy'),
-                    sound.spectrogram)
+            np.save(
+                Path(file.parent / f'{file.stem[:-5]}2D.npy'),
+                sound.spectrogram,
+            )
+            np.save(
+                Path(file.parent / f'{file.stem[:-5]}mfcc.npy'), sound.mfcc,
+            )
+            # np.save(Path(file.parent / f'{file.stem[:-2]}mel.npy'),
+            #        sound.mel)
 
 
 class ToTensor(object):
@@ -128,17 +131,21 @@ class ToTensor(object):
 
     def __call__(self, sample):
 
-        sound, label = sample['sound'], sample['label']
         if self.data_nature == '1D':
             return {
-                'sound': torch.from_numpy(sound.y).unsqueeze(0),
-                'label': label,
+                'x': torch.from_numpy(sample['sound']).unsqueeze(0),
+                'label': sample['label'],
             }
         # conv1D expect sample following the shape [bs,nb_channel,lenght]
         elif self.data_nature == '2D':
             return {
-                'sound': torch.from_numpy(sound.spectrogram),
-                'label': label,
+                'x': torch.from_numpy(sample['spectrogam']),
+                'label': sample['label'],
+            }
+        elif self.data_nature == 'mfcc':
+            return {
+                'x': torch.from_numpy(sample['mfcc']),
+                'label': sample['label'],
             }
         else:
             raise ToTensor.ModeNotRecognised(
