@@ -16,20 +16,20 @@ from display import Bar, Color
 
 class Metamodel:
     def __init__(
-        self,
-        dataset_name,
-        data_nature,
-        process_data,
-        sampling_rate,
-        transform,
-        loss_fc,
-        optimizer,
-        learning_rate,
-        nb_epochs,
-        batch_size,
-        test_size,
-        network_class,
-        scheduler,
+            self,
+            dataset_name,
+            data_nature,
+            network_class,
+            process_data='Auto',
+            sampling_rate=48000,
+            transform=None,
+            loss_fc=nn.NLLLoss(),
+            optimizer=torch.optim.Adamax,
+            learning_rate=10e-3,
+            nb_epochs=4,
+            batch_size=8,
+            test_size=.2,
+            scheduler=None,
     ):
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu"
