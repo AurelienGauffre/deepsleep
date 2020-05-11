@@ -20,7 +20,6 @@ class SoundDataset(Dataset):
         self,
         dataset_name,
         transform,
-        data_nature='2D',
         sampling_rate=None,
         process_data='Auto',
     ):
@@ -31,7 +30,6 @@ class SoundDataset(Dataset):
                 on a sample.
         """
         self.dataset_name = dataset_name
-        self.data_nature = data_nature
         self.sampling_rate = sampling_rate
         self.root_dir = SoundDataset.DATA_FOLDER / dataset_name
         self.raw_dir = self.root_dir / 'raw'

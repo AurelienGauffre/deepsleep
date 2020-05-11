@@ -15,11 +15,11 @@ from display import Bar, Color
 
 
 class Metamodel:
+
     def __init__(
             self,
-            dataset_name,
-            data_nature,
             network_class,
+            dataset_name,
             process_data='Auto',
             sampling_rate=48000,
             transform=None,
@@ -41,11 +41,10 @@ class Metamodel:
         self.dataset_name = dataset_name
         self.process_data = process_data
         self.learning_rate = learning_rate
-        self.data_nature = data_nature
         self.test_size = test_size
         self.log_interval = 10
         self.confusion_matrix = None
-
+        self.data_nature = network_class.data_nature # TO FIX
         self.transform = self.init_transform(transform)
         (
             self.dataset,
@@ -53,7 +52,8 @@ class Metamodel:
             self.dataset_test,
         ) = self.init_dataset()
         self.train_loader, self.test_loader = self.init_data_loader()
-        self.network = self.init_network(network_class)
+
+        self.network = self.init_network(network_class) # TO FIX
         self.optimizer = self.init_optimizer(optimizer)
         self.scheduler = self.init_scheduler()
 
@@ -70,7 +70,6 @@ class Metamodel:
         dataset = SoundDataset(
             dataset_name=self.dataset_name,
             transform=self.transform,
-            data_nature=self.data_nature,
             sampling_rate=self.sampling_rate,
             process_data=self.process_data,
         )
