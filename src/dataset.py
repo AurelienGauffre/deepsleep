@@ -17,11 +17,11 @@ class SoundDataset(Dataset):
         pass
 
     def __init__(
-        self,
-        dataset_name,
-        transform,
-        sampling_rate=None,
-        process_data='Auto',
+            self,
+            dataset_name,
+            transform,
+            sampling_rate=None,
+            process_data='Auto',
     ):
         """
         Args:
@@ -57,7 +57,6 @@ class SoundDataset(Dataset):
         #     idx = idx.tolist()
         file = Path(self.files_list[idx])
         label = file.parent.stem  # label is the folder name
-
         sound = np.load(file.parent / f'{file.stem[:-5]}1D.npy')
         spectrogram = np.load(file.parent / f'{file.stem[:-5]}2D.npy')
         mfcc = np.load(file.parent / f'{file.stem[:-5]}mfcc.npy')
@@ -102,7 +101,7 @@ class SoundDataset(Dataset):
             )
         # Other processing
         for file in list(self.processed_dir.rglob('*clean.wav')):
-            sound = Sound(file, process=True, sampling_rate=None,)
+            sound = Sound(file, process=True, sampling_rate=None, )
             np.save(
                 Path(file.parent / f'{file.stem[:-5]}1D.npy'), sound.y,
             )
@@ -137,7 +136,9 @@ class ToTensor(object):
         # conv1D expect sample following the shape [bs,nb_channel,lenght]
         elif self.data_nature == '2D':
             return {
-                'x': torch.from_numpy(sample['spectrogam']),
+                'x': torch.from_numpy(
+                    sample['spectrogram'][np.newaxis, :]
+                ),
                 'label': sample['label'],
             }
         elif self.data_nature == 'mfcc':

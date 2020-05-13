@@ -12,8 +12,6 @@ class ClassificationNetwork(nn.Module):
     def __init__(self, nb_labels):
         super(ClassificationNetwork, self).__init__()
         self.nb_label = nb_labels
-
-
     def forward(self, x):
         raise NotImplementedError
 
@@ -61,4 +59,43 @@ class NetConv1D(ClassificationNetwork):
         x = self.avgPool(x)
         x = x.view(x.shape[0], -1)  # from shape (bs,channel,len)  to (bs,len)
         x = self.fc1(x)
+        return F.log_softmax(x, dim=1)
+
+
+
+class NetConv2D(ClassificationNetwork):
+    data_nature = '2D'
+    def __init__(self, nb_labels):
+        super().__init__(nb_labels)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3,
+                               padding=1, stride=1)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3,
+                               padding=1, stride=1)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3,
+                               padding=1, stride=1)
+        self.conv4 = nn.Conv2d(in_channels=128, out_channels=256,
+                               kernel_size=3,
+                               padding=1, stride=1)
+        self.conv5 = nn.Conv2d(in_channels=256, out_channels=512,
+                               kernel_size=3,
+                               padding=1, stride=1)
+        self.lin1 = nn.Linear(11 * 8 * 512, 128)
+        self.lin2 = nn.Linear(128, nb_labels)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, kernel_size=2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, kernel_size=2)
+        x = F.relu(self.conv3(x))
+        x = F.max_pool2d(x, kernel_size=2)
+        x = F.relu(self.conv4(x))
+        x = F.max_pool2d(x, kernel_size=2)
+        x = F.relu(self.conv5(x))
+        x = F.max_pool2d(x, kernel_size=2)
+
+        x = x.view(x.shape[0], -1)
+        x = F.relu(self.lin1(x))
+        x = self.lin2(x)
+        x = F.log_softmax(x, dim=1)
         return F.log_softmax(x, dim=1)
