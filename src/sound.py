@@ -1,4 +1,4 @@
-import os
+
 from pathlib import Path
 
 import librosa  # Librosa for audio
@@ -23,8 +23,6 @@ class Sound:
         process: bool = True,
     ):
         self.path = path
-        self.folder, self.filename = path.parent, path.name
-        self.filebase, self.ext = os.path.splitext(self.filename)
         self.y, self.sampling_rate = librosa.load(self.path, sr=sampling_rate)
         self.spectrogram = None
         self.mfcc = None
@@ -100,14 +98,14 @@ class Sound:
         """
 
         if output_folder is None:
-            output_folder = self.folder
+            output_folder = self.path.parent
         step_size = int(sample_length * self.sampling_rate)
         i = 0
         n = len(self.y)
 
         def save(i, suffix, y):
             librosa.output.write_wav(
-                Path(output_folder / f'{self.filebase}_{i}_{suffix}.wav'),
+                Path(output_folder / f'{self.path.stem}_{i}_{suffix}.wav'),
                 y,
                 sr=self.sampling_rate,
                 norm=False,
@@ -115,23 +113,25 @@ class Sound:
 
         if n < step_size:  # sound is smaller than required sample size
             # print(' short', np.pad(self.y, (0, step_size - n)).shape)
+
             save(0, suffix, np.pad(self.y, (0, step_size - n)))
         else:
+
             for i in range(n // step_size):
-                save(0, suffix, self.y[i * step_size : (i + 1) * step_size])
+                save(i, suffix, self.y[i * step_size : (i + 1) * step_size])
             if n % step_size != 0:  # handling of last sample
                 i = n // step_size
                 if mode == 'drop':
                     pass
                 elif mode == 'duplicate':
-                    save(0, suffix, self.y[n - step_size : n])
+                    save(i, suffix, self.y[n - step_size : n])
                 elif mode == 'keep':
-                    save(0, suffix, self.y[i * step_size : n])
+                    save(i, suffix, self.y[i * step_size : n])
 
 
 if __name__ == '__main__':
-    folder = Path('../data/UrbanSound8K/processed/4')
-    for file in folder.glob('*.wav'):
+    folder = Path('../data/debug/raw/class1/')
+    for file in folder.glob('*.aac'):
         print(file)
         s1 = Sound(file, process=True, sampling_rate=None)
         # s1.plot_spectrogram()
@@ -142,4 +142,4 @@ if __name__ == '__main__':
         s1.spectrogram = s1.mfcc
         s1.plot_spectrogram()
         plt.show()
-        # s1.to_samples(sample_length=4, mode='duplicate')
+        s1.to_samples(sample_length=4, mode='duplicate')
