@@ -1,6 +1,7 @@
 # deepsleep :zzz:
 Sleep analysis from sound recording using Pytorch. 
-First aim of this project is to build and tune general sound classifiers to detect automatically for instance somniloquy.
+First aim of this project is to build and tune general sound classifiers to detect automatically somniloquy.
+The current most effective implemented approach is based on CNN applied directly to the sound spectrogram images.
 
 ### Get the datasets
 Run the following command to populate your `data/` folder with the datasets:
